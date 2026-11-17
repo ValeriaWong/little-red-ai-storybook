@@ -1,0 +1,198 @@
+/* Little Red Riding Hood — On-Device AI Storybook
+   Warm, kid-friendly, big tap targets (44px+). Vertical 9:16 stage. */
+
+:root {
+  --red: #c0392b;
+  --red-dark: #922b21;
+  --cream: #fdf6ec;
+  --paper: #fffdf7;
+  --ink: #3b2f2f;
+  --soft: #8a6d6d;
+  --green: #2e7d32;
+  --blue: #1565c0;
+  --line: #e8dcc8;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: "Avenir Next", "Segoe UI", system-ui, -apple-system, sans-serif;
+  line-height: 1.55;
+}
+
+.stage {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 12px 16px 40px;
+}
+
+.masthead { text-align: center; margin: 8px 0 4px; }
+.masthead h1 { margin: 0; font-size: 1.5rem; color: var(--red); }
+.tagline { margin: 2px 0 0; color: var(--soft); font-size: 0.85rem; }
+
+.config-banner {
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  margin: 12px 0;
+}
+
+.scene {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+  margin: 12px 0;
+  box-shadow: 0 2px 10px rgba(59, 47, 47, 0.06);
+}
+
+.scene img {
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  max-height: 52vh;
+  object-fit: cover;
+  object-position: center 30%;
+  border-radius: 12px;
+  display: block;
+  background: #f0e6d6;
+}
+
+.scene h2 { margin: 14px 0 6px; font-size: 1.3rem; }
+.narration { font-size: 1.08rem; margin: 8px 0; }
+.narration.unique { font-weight: 600; }
+.note { color: var(--soft); font-size: 0.92rem; }
+
+.ending-tag {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 0.75rem;
+  background: var(--red);
+  color: #fff;
+  border-radius: 999px;
+  padding: 2px 8px;
+  vertical-align: middle;
+}
+
+.btn {
+  display: block;
+  width: 100%;
+  min-height: 52px;
+  margin: 8px 0;
+  padding: 12px 16px;
+  font-size: 1.05rem;
+  font-family: inherit;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  text-align: left;
+  background: #f5efe3;
+  color: var(--ink);
+}
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn strong { display: block; }
+.btn span { display: block; font-size: 0.92rem; color: var(--soft); font-weight: 400; }
+
+.btn-primary {
+  background: var(--red);
+  color: #fff;
+  text-align: center;
+  font-weight: 700;
+}
+.btn-primary:hover { background: var(--red-dark); }
+
+.btn-secondary { background: #f5efe3; text-align: center; }
+
+.btn-choice { border-color: var(--line); }
+.btn-choice:hover { border-color: var(--red); background: #fdf0ee; }
+
+.btn-help {
+  background: #e8f5e9;
+  border-color: #a5d6a7;
+}
+.btn-help:hover { background: #c8e6c9; }
+
+.btn-ai { background: #e3f2fd; border-color: #90caf9; text-align: center; }
+.btn-ai:hover { background: #bbdefb; }
+
+.choices { margin-top: 12px; }
+
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 12px 0;
+}
+.btn-card { text-align: center; min-height: 56px; font-size: 1.1rem; }
+.btn-card.asked { border-color: var(--green); background: #e8f5e9; }
+
+.card-answer {
+  margin: 12px 0;
+  padding: 10px 14px;
+  background: #f3e5f5;
+  border-left: 4px solid #8e24aa;
+  border-radius: 8px;
+}
+.card-answer p { margin: 4px 0; }
+
+.asked-so-far { margin-top: 8px; font-size: 0.92rem; }
+.asked-so-far summary { cursor: pointer; color: var(--soft); }
+
+.recap-list { padding-left: 20px; }
+.recap-list li { margin: 6px 0; font-size: 1.05rem; }
+
+.ai-panel {
+  background: #eef4ff;
+  border: 1px solid #c5d9f5;
+  border-radius: 16px;
+  padding: 16px;
+  margin: 12px 0;
+}
+.ai-panel h2 { margin: 0 0 6px; font-size: 1.1rem; }
+.ai-note { font-size: 0.9rem; color: var(--soft); }
+.ai-error { color: var(--red-dark); font-size: 0.95rem; }
+.ai-actions { display: flex; flex-direction: column; }
+.ai-answer { margin: 12px 0 0; }
+.ai-answer blockquote {
+  margin: 0;
+  padding: 12px 14px;
+  background: #fff;
+  border-left: 4px solid var(--blue);
+  border-radius: 8px;
+  font-size: 1.05rem;
+}
+.ai-answer figcaption { margin-top: 8px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.ai-credit { font-size: 0.85rem; color: var(--soft); }
+.ai-image img { width: 100%; border-radius: 12px; margin-top: 8px; }
+.ai-image figcaption { font-size: 0.9rem; color: var(--soft); margin-top: 4px; }
+
+.chip {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+.chip-device { background: #e8f5e9; color: var(--green); border: 1px solid #a5d6a7; }
+.chip-cloud { background: #e3f2fd; color: var(--blue); border: 1px solid #90caf9; }
+
+.footer {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+.btn-footer {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 120px;
+  text-align: center;
+  font-size: 0.95rem;
+  min-height: 44px;
+  background: #fff;
+  border-color: var(--line);
+}
