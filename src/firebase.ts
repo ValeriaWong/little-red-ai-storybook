@@ -46,7 +46,11 @@
  * ---------------------------------------------------------------------------
  */
 import { initializeApp, type FirebaseApp } from 'firebase/app';
-import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
+import {
+  CustomProvider,
+  initializeAppCheck,
+  ReCaptchaV3Provider,
+} from 'firebase/app-check';
 import {
   getAI,
   getGenerativeModel,
@@ -99,18 +103,42 @@ export function getFirebaseApp(): FirebaseApp | null {
 }
 
 /**
- * App Check. The AI Logic setup workflow enforces App Check for AI Logic.
- * For local development, enable the debug provider: set
- * `self.FIREBASE_APPCHECK_DEBUG_TOKEN = true` before initializeAppCheck,
- * then register the printed debug token in the Firebase console
- * (Security > App Check > Apps > Manage debug tokens).
- * A reCAPTCHA v3 site key is only needed for the production provider;
- * without one, App Check init is skipped (and AI calls will fail with a
- * clear error until it is set up — the story still works).
+ * App Check. The AI Logic setup workflow enforces App Check for AI Logic,
+ * so the deployed site needs a valid token or every AI call fails with 401.
+ * Three paths, in order:
+ * 1. Debug token (VITE_FIREBASE_APPCHECK_DEBUG_TOKEN) — the token must be
+ *    registered in the Firebase console (App Check > Manage debug tokens).
+ *    The SDK exchanges the debug token directly; the CustomProvider below
+ *    only satisfies initializeAppCheck's provider requirement and is never
+ *    called in debug mode. Debug tokens are accepted by the hackathon rules.
+ * 2. reCAPTCHA v3 site key (VITE_RECAPTCHA_V3_SITE_KEY) — the production
+ *    provider.
+ * 3. Local dev only: `self.FIREBASE_APPCHECK_DEBUG_TOKEN = true` prints a
+ *    token to the console for registering in the console.
+ * With none of these, App Check init is skipped and AI calls fail with a
+ * clear error until it is set up — the story itself still works.
  */
 function initAppCheck(firebaseApp: FirebaseApp): void {
   if (appCheckReady) return;
   try {
+    const debugToken = import.meta.env.VITE_FIREBASE_APPCHECK_DEBUG_TOKEN as
+      | string
+      | undefined;
+    if (debugToken) {
+      (self as unknown as Record<string, unknown>).FIREBASE_APPCHECK_DEBUG_TOKEN =
+        debugToken;
+      initializeAppCheck(firebaseApp, {
+        provider: new CustomProvider({
+          getToken: async () => ({
+            token: debugToken,
+            expireTimeMillis: Date.now() + 60 * 60 * 1000,
+          }),
+        }),
+        isTokenAutoRefreshEnabled: true,
+      });
+      appCheckReady = true;
+      return;
+    }
     if (import.meta.env.DEV) {
       (self as unknown as Record<string, unknown>).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
     }
@@ -123,7 +151,7 @@ function initAppCheck(firebaseApp: FirebaseApp): void {
       appCheckReady = true;
     } else {
       console.warn(
-        '[storybook] No VITE_RECAPTCHA_V3_SITE_KEY set — App Check not initialized. ' +
+        '[storybook] No VITE_FIREBASE_APPCHECK_DEBUG_TOKEN or VITE_RECAPTCHA_V3_SITE_KEY set — App Check not initialized. ' +
           'AI calls will fail until App Check is configured; the story itself still works.',
       );
     }

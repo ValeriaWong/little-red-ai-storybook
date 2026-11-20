@@ -6,10 +6,9 @@
  * Run: npm test
  */
 // @vitest-environment jsdom
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './App';
 
 function findButton(el: HTMLElement, text: string): HTMLButtonElement {
   const btn = [...el.querySelectorAll('button')].find((b) =>
@@ -21,6 +20,15 @@ function findButton(el: HTMLElement, text: string): HTMLButtonElement {
 
 describe('render smoke', () => {
   it('renders the cover, starts, and advances through a choice branch', async () => {
+    // The real .env may hold a Firebase config now; stub it away so this
+    // test still exercises the unconfigured (graceful degradation) path.
+    // firebase.ts reads import.meta.env at module load, so import App
+    // dynamically after stubbing.
+    vi.stubEnv('VITE_FIREBASE_API_KEY', '');
+    vi.stubEnv('VITE_FIREBASE_PROJECT_ID', '');
+    vi.stubEnv('VITE_FIREBASE_APPCHECK_DEBUG_TOKEN', '');
+    const { default: App } = await import('./App');
+
     const el = document.createElement('div');
     document.body.appendChild(el);
     const root = createRoot(el);
@@ -66,5 +74,6 @@ describe('render smoke', () => {
       root.unmount();
     });
     el.remove();
+    vi.unstubAllEnvs();
   });
 });
