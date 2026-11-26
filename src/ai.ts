@@ -62,7 +62,7 @@ export async function continueStory(
       text: '',
       source: 'NOT_CONFIGURED',
       error:
-        'Firebase is not connected yet. The storybook will get its AI voice when the Firebase project is connected (expected Nov 19, when the quota account arrives). The story itself works without it.',
+        'Firebase is not connected yet. The storybook will get its AI voice when the Firebase project is connected. The story itself works without it.',
     };
   }
   const model = getHybridModel();
@@ -99,7 +99,7 @@ export async function generateSceneImage(
       imageUrl: null,
       source: 'DISABLED',
       error:
-        'Drawing new pictures is switched off until the quota account arrives (Nov 19). The storybook already has its keyframe illustrations — this button will draw a fresh one for the current scene once the account is connected.',
+        'Drawing new pictures is switched off until the quota account arrives. The storybook already has its keyframe illustrations — this button will draw a fresh one for the current scene once the account is connected.',
     };
   }
   if (!isFirebaseConfigured()) {

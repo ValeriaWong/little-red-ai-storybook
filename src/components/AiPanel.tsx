@@ -63,7 +63,7 @@ export default function AiPanel({ state, sceneTitle, sceneText }: AiPanelProps) 
       {!configured && (
         <p className="ai-note">
           The storyteller is quiet for now — Firebase isn&apos;t connected yet. The AI
-          voice arrives when the Firebase project is connected (expected Nov 19).
+          voice arrives when the Firebase project is connected.
           The story itself works without it.
         </p>
       )}
@@ -77,7 +77,7 @@ export default function AiPanel({ state, sceneTitle, sceneText }: AiPanelProps) 
           disabled={imgBusy || !configured || !IMAGE_GENERATION_ENABLED}
           title={
             !IMAGE_GENERATION_ENABLED
-              ? 'Switched off until the quota account arrives (Nov 19)'
+              ? 'Switched off until the quota account arrives'
               : undefined
           }
         >
@@ -86,7 +86,7 @@ export default function AiPanel({ state, sceneTitle, sceneText }: AiPanelProps) 
       </div>
       {!IMAGE_GENERATION_ENABLED && configured && (
         <p className="ai-note">
-          Drawing new pictures is switched off until the quota account arrives (Nov 19).
+          Drawing new pictures is switched off until the quota account arrives.
         </p>
       )}
       {error && <p className="ai-error">{error}</p>}
