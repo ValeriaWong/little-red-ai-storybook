@@ -59,9 +59,9 @@ function speakableLines(node: StoryNode): string[] {
 // B1 daisy hotspots, positioned over the three daisies in flowers.jpg
 // (K05 keyframe: daisy bush + Red + basket, three flowers clearly visible).
 const DAISIES = [
-  { id: 'daisy-1', left: '13%', top: '70%' },
-  { id: 'daisy-2', left: '22%', top: '65%' },
-  { id: 'daisy-3', left: '31%', top: '71%' },
+  { id: 'daisy-1', left: '17%', top: '74%' },
+  { id: 'daisy-2', left: '26%', top: '69%' },
+  { id: 'daisy-3', left: '35%', top: '75%' },
 ];
 const COUNT_WORDS = ['One!', 'Two!', 'Three!'];
 // Flowerbed branch hotspot, over the grey tuft on the branch in fork.jpg.
