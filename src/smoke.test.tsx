@@ -57,9 +57,30 @@ describe('render smoke', () => {
     });
     expect(el.textContent).toContain('A little surprise');
 
-    // B1 choice: pick the flowers -> B2 wolf scene
+    // B1 choice: pick the flowers -> flower-picking mini-game -> B2 wolf scene
     await act(async () => {
       findButton(el, 'Pick three daisies').click();
+    });
+    // Picking view: basket counter starts at 0 of 3
+    expect(el.textContent).toContain('Basket: 0 of 3');
+    const daisies = () =>
+      [...el.querySelectorAll('button[aria-label="Tap this daisy"]')] as HTMLButtonElement[];
+    expect(daisies()).toHaveLength(3);
+    await act(async () => {
+      daisies()[0].click();
+    });
+    expect(el.textContent).toContain('Basket: 1 of 3');
+    expect(el.textContent).toContain('One!');
+    await act(async () => {
+      daisies()[0].click();
+    });
+    await act(async () => {
+      daisies()[0].click();
+    });
+    expect(el.textContent).toContain('Basket: 3 of 3');
+    expect(el.textContent).toContain('Three daisies, gently in the basket.');
+    await act(async () => {
+      findButton(el, 'Put them in the basket').click();
     });
     expect(el.textContent).toContain("The wolf's question");
     expect(el.textContent).toContain('Tell him');

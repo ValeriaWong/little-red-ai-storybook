@@ -1,4 +1,4 @@
-import { useReducer, useState } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import { isFirebaseConfigured } from '../firebase';
 import { speakLines, speechSupported, stopSpeaking } from '../speech';
 import {
@@ -56,10 +56,35 @@ function speakableLines(node: StoryNode): string[] {
   }
 }
 
+// B1 daisy hotspots, positioned over the three daisies in flowers.jpg
+// (K05 keyframe: daisy bush + Red + basket, three flowers clearly visible).
+const DAISIES = [
+  { id: 'daisy-1', left: '13%', top: '70%' },
+  { id: 'daisy-2', left: '22%', top: '65%' },
+  { id: 'daisy-3', left: '31%', top: '71%' },
+];
+const COUNT_WORDS = ['One!', 'Two!', 'Three!'];
+// Flowerbed branch hotspot, over the grey tuft on the branch in fork.jpg.
+const FUR_SPOT = { left: '84%', top: '64%' };
+
 export default function StoryPlayer() {
   const [state, dispatch] = useReducer(reduce, INITIAL_STATE);
   const [reading, setReading] = useState(false);
+  // B1 flower game (v5: tap three daisies, each flies into the basket,
+  // Red counts "One, two, three!") and the flowerbed branch tap (v5: tap
+  // the branch to find the grey fur). Both are UI-only pre-steps; the
+  // engine state machine is untouched — the game dispatches the same
+  // 'choose' action the plain button used to.
+  const [picking, setPicking] = useState(false);
+  const [picked, setPicked] = useState<string[]>([]);
+  const [foundFur, setFoundFur] = useState(false);
   const node = getNode(state);
+  // Reset the mini-games whenever the story moves to another node.
+  useEffect(() => {
+    setPicking(false);
+    setPicked([]);
+    setFoundFur(false);
+  }, [node.id]);
   const configured = isFirebaseConfigured();
   const pastFork = state.node !== 'cover' && state.node !== 'kitchen' && state.node !== 'gate' && state.node !== 'b1' && state.node !== 'b2';
 
@@ -102,7 +127,22 @@ export default function StoryPlayer() {
 
       {node.kind === 'narration' && (
         <section className="scene">
-          <img src={`images/${node.image}`} alt={node.imageAlt} />
+          {node.id === 'flowerbed' ? (
+            <div className="tap-field">
+              <img src={`images/${node.image}`} alt={node.imageAlt} />
+              <button
+                type="button"
+                className={`hotspot${foundFur ? ' picked' : ''}`}
+                style={{ left: FUR_SPOT.left, top: FUR_SPOT.top }}
+                aria-label={foundFur ? 'Grey fur found' : 'Tap the branch'}
+                onClick={() => setFoundFur(true)}
+              >
+                {foundFur ? '✓' : '🔍'}
+              </button>
+            </div>
+          ) : (
+            <img src={`images/${node.image}`} alt={node.imageAlt} />
+          )}
           <h2>{node.title}</h2>
           {node.id === 'reunion' && state.gift === 'flowers' && (
             <p className="narration">
@@ -117,9 +157,20 @@ export default function StoryPlayer() {
               opens her arms. &ldquo;That&rsquo;s my favourite thing to hear.&rdquo;
             </p>
           )}
-          {node.lines.map((line, i) => (
-            <p className="narration" key={i}>{line}</p>
-          ))}
+          {node.id === 'flowerbed' ? (
+            <>
+              <p className="narration">{node.lines[0]}</p>
+              {foundFur ? (
+                <p className="narration">{node.lines[1]}</p>
+              ) : (
+                <p className="narration">Tap the branch — what&rsquo;s that grey thing?</p>
+              )}
+            </>
+          ) : (
+            node.lines.map((line, i) => (
+              <p className="narration" key={i}>{line}</p>
+            ))
+          )}
           {wolf && node.id === 'interlude' && <p className="note">{wolf}</p>}
           <button className="btn btn-primary" onClick={() => dispatch({ type: 'next' })}>
             {node.nextLabel} →
@@ -129,21 +180,80 @@ export default function StoryPlayer() {
 
       {node.kind === 'choice' && (
         <section className="scene">
-          <img src={`images/${node.image}`} alt={node.imageAlt} />
+          {node.id === 'b1' && picking ? (
+            <div className="tap-field">
+              <img src={`images/${node.image}`} alt={node.imageAlt} />
+              {DAISIES.map((d) => (
+                <button
+                  key={d.id}
+                  type="button"
+                  className={`hotspot daisy${picked.includes(d.id) ? ' picked' : ''}`}
+                  style={{ left: d.left, top: d.top }}
+                  aria-label={picked.includes(d.id) ? 'Daisy picked' : 'Tap this daisy'}
+                  disabled={picked.includes(d.id)}
+                  onClick={() => setPicked((prev) => [...prev, d.id])}
+                >
+                  🌼
+                </button>
+              ))}
+            </div>
+          ) : (
+            <img src={`images/${node.image}`} alt={node.imageAlt} />
+          )}
           <h2>{node.title}</h2>
-          <p className="narration">{node.question}</p>
-          <div className="choices">
-            {node.options.map((opt) => (
-              <button
-                key={opt.id}
-                className="btn btn-choice"
-                onClick={() => dispatch({ type: 'choose', optionId: opt.id })}
-              >
-                <strong>{opt.label}</strong>
-                {opt.detail && <span>{opt.detail}</span>}
-              </button>
-            ))}
-          </div>
+          {node.id === 'b1' && picking ? (
+            <>
+              <p className="narration">Tap a daisy — one, two, three, into the basket!</p>
+              <p className="basket-count" role="status">
+                🧺 Basket: {picked.length} of 3
+                {picked.length > 0 && picked.length < 3 && ` — ${COUNT_WORDS[picked.length - 1]}`}
+              </p>
+              {picked.length === 3 && (
+                <>
+                  <p className="narration">Three daisies, gently in the basket.</p>
+                  <div className="choices">
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => {
+                        setPicking(false);
+                        setPicked([]);
+                        dispatch({ type: 'choose', optionId: 'flowers' });
+                      }}
+                    >
+                      Put them in the basket →
+                    </button>
+                  </div>
+                </>
+              )}
+              <div className="choices">
+                <button className="btn btn-secondary" onClick={() => { setPicking(false); setPicked([]); }}>
+                  ← Back to choose
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="narration">{node.question}</p>
+              <div className="choices">
+                {node.options.map((opt) => (
+                  <button
+                    key={opt.id}
+                    className="btn btn-choice"
+                    onClick={() => {
+                      if (node.id === 'b1' && opt.id === 'flowers') {
+                        setPicking(true);
+                      } else {
+                        dispatch({ type: 'choose', optionId: opt.id });
+                      }
+                    }}
+                  >
+                    <strong>{opt.label}</strong>
+                    {opt.detail && <span>{opt.detail}</span>}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
           {node.id === 'b2' && wolf && <p className="note">{wolf}</p>}
         </section>
       )}
